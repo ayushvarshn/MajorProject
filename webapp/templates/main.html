@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Battery Monitoring System</title>
+    <title>Voltage - BMS</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.css" rel="stylesheet">
     <link rel="shortcut icon" type="image/jpg" href="{{ url_for('static', filename='favicon.ico') }}"/>
@@ -131,6 +131,13 @@
                         mode: 'index',
                         intersect: false,
                     },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    legend: {
+                        display: false
+                    },
                     scales: {
                         xAxes: [{
                             display: false,
@@ -170,6 +177,13 @@
                     tooltips: {
                         mode: 'index',
                         intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    legend: {
+                        display: false
                     },
                     scales: {
                         xAxes: [{
@@ -211,6 +225,13 @@
                         mode: 'index',
                         intersect: false,
                     },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    legend: {
+                        display: false
+                    },
                     scales: {
                         xAxes: [{
                             display: false,
@@ -250,6 +271,13 @@
                     tooltips: {
                         mode: 'index',
                         intersect: false,
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    },
+                    legend: {
+                        display: false
                     },
                     scales: {
                         xAxes: [{
