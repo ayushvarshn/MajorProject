@@ -1,14 +1,9 @@
-import json
-import random
-import time
+from flask import render_template, url_for, flash, redirect, request, make_response, Response
+from bms import application, bcrypt, db
+import json, time, random
 from datetime import datetime
-
-from flask import Flask, Response, render_template, url_for, request, make_response, flash, redirect
-
-application = Flask(__name__)
+from bms.models import User, Battery
 random.seed()  # Initialize the random number generator
-application.config['SECRET_KEY'] = '5791628bb0b13ce0c676dfde280ba245'
-
 
 @application.route('/', methods=['GET', 'POST'])
 def index():
@@ -17,22 +12,53 @@ def index():
         return render_template('main.html', username=username)
     return render_template('main.html')
 
+
 @application.route('/login', methods=['GET', 'POST'])
 def login():
     username = request.cookies.get('username')
+    next_url = request.form.get("next")
     if username:
-        return render_template('user.html', username=username)
+        return redirect('/')
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        if username == 'admin' and password == '9b71d224bd62f3785d96d46ad3ea3d73319bfbc2890caadae2dff72519673ca72323c3d99ba5c11d7c7acc6e14b8c5da0c4663475c2e5c3adef46f73bcdec043':
-            flash("Successful login", "success")
-            resp = make_response(redirect('/'))
-            resp.set_cookie('username', username)
-            return resp
+        user=User.query.filter_by(username=username).first()
+        if user:
+            pwd=bcrypt.check_password_hash(user.password, password)
+            if pwd:
+                if next_url:
+                    resp = make_response(redirect(next_url))
+                    resp.set_cookie('username', username)
+                    return resp
+                resp = make_response(redirect('/'))
+                resp.set_cookie('username', username)
+                return resp
+            else:
+                flash("Incorrect username or password", "danger")
+                return render_template('login.html')
         else:
-            flash("Wrong username or password", "danger")
+            flash("Incorrect username or password", "danger")
+            return render_template('login.html')
     return render_template('login.html')
+
+
+@application.route('/register', methods=['GET', 'POST'])
+def register():
+    username = request.cookies.get('username')
+    if username:
+        return redirect('/')
+    if request.method == 'POST':
+        user = User.query.filter_by(username=request.form.get('username')).first()
+        if user:
+            flash("Username already taken!")
+            return redirect(url_for('register'))
+        hashed_pw = bcrypt.generate_password_hash(request.form.get('password')).decode('utf-8')
+        user = User(name=request.form.get('name'), username=request.form.get('username'), password=hashed_pw)
+        db.session.add(user)
+        db.session.commit()
+        flash("Account created successfully", "success")
+        return redirect(url_for('login'))
+    return render_template('register.html')
 
 
 @application.route('/home', methods=['GET', 'POST'])
@@ -40,14 +66,15 @@ def home():
     username = request.cookies.get('username')
     if username:
         return render_template('home.html', username=username)
-    return redirect('/')
+    return redirect(url_for('login', next=request.endpoint))
+
 
 @application.route('/temperature', methods=['GET', 'POST'])
-def temp():
+def temperature():
     username = request.cookies.get('username')
     if username:
         return render_template('temp.html', username=username)
-    return redirect('/')
+    return redirect(url_for('login', next=request.endpoint))
 
 
 @application.route('/voltage', methods=['GET', 'POST'])
@@ -55,7 +82,7 @@ def voltage():
     username = request.cookies.get('username')
     if username:
         return render_template('voltage.html', username=username)
-    return redirect('/')
+    return redirect(url_for('login', next=request.endpoint))
 
 
 @application.route('/soc', methods=['GET', 'POST'])
@@ -63,7 +90,7 @@ def soc():
     username = request.cookies.get('username')
     if username:
         return render_template('soc.html', username=username)
-    return redirect('/')
+    return redirect(url_for('login', next=request.endpoint))
 
 
 @application.route('/soh', methods=['GET', 'POST'])
@@ -71,7 +98,7 @@ def soh():
     username = request.cookies.get('username')
     if username:
         return render_template('soh.html', username=username)
-    return redirect('/')
+    return redirect(url_for('login', next=request.endpoint))
 
 
 @application.route('/chart-data', methods=['GET', 'POST'])
@@ -91,14 +118,10 @@ def user():
     username = request.cookies.get('username')
     if username:
         return render_template('user.html', username=username)
-    return redirect('/')
+    return redirect(url_for('login', next=request.endpoint))
 
 @application.route('/logout', methods=['GET'])
 def logout():
     resp = make_response(redirect('/'))
     resp.delete_cookie('username')
     return resp
-
-
-if __name__ == '__main__':
-    application.run(debug=True, threaded=True)

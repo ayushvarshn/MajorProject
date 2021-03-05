@@ -1,8 +1,8 @@
 {% extends 'layout.html' %}
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12 col-sm-12 col-md-12 pt-4">
+    <div class="container p-4">
+        <div class="row p-4">
+            <div class="">
                 <div class="card">
                     <div class="card-body">
                         <canvas id="canvas"></canvas>
@@ -20,7 +20,7 @@
                 data: {
                     labels: [],
                     datasets: [{
-                        label: "Temperature",
+                        label: "SoH",
                         backgroundColor: 'rgb(255, 99, 132)',
                         borderColor: 'rgb(255, 99, 132)',
                         data: [],
@@ -31,7 +31,7 @@
                     responsive: true,
                     title: {
                         display: true,
-                        text: 'Creating Real-Time Charts with Flask'
+                        text: 'Realtime SoH variation'
                     },
                     tooltips: {
                         mode: 'index',
@@ -53,7 +53,7 @@
                             display: true,
                             scaleLabel: {
                                 display: true,
-                                labelString: 'Temperature'
+                                labelString: 'SoH in %'
                             }
                         }]
                     }
@@ -73,7 +73,7 @@
                     config.data.datasets[0].data.shift();
                 }
                 config.data.labels.push(data.time);
-                config.data.datasets[0].data.push(data.temp);
+                config.data.datasets[0].data.push(data.soh);
                 lineChart.update();
             }
         });
