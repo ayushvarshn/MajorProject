@@ -3,6 +3,7 @@ from bms import application, bcrypt, db
 from bms.models import User, Battery
 from secrets import token_hex
 from bms.forms import RegistrationForm, LoginForm, UpdateAccountForm, AddBattery, ChangePassword
+import os
 
 
 @application.errorhandler(404)
@@ -105,6 +106,7 @@ def account():
         return render_template('account.html', username=username, form=form, user=user, title='Account')
     return redirect(url_for('login', next=request.endpoint))
 
+
 @application.route('/changepassword', methods=['GET', 'POST'])
 def changepassword():
     username = request.cookies.get('email')
@@ -139,9 +141,10 @@ def delete():
     if username:
         if request.method == 'POST':
             token = request.form.get('token')
-            print(token)
             Battery.query.filter_by(token=token).delete()
             db.session.commit()
+            if os.path.exists('csv/'+token+'.csv'):
+                os.remove('csv/'+token+'.csv')
             flash('The battery has been deleted!', 'info')
             return redirect('/home')
         return redirect(url_for('home'))
@@ -150,7 +153,7 @@ def delete():
 
 @application.route('/demo')
 def demo():
-    token = '050f90176712922693876167559534ca1d715aa1a128c86179f40701964b'
+    token = 'a0421187c3061d4897abafa01eab0630b61fd6c02d72ce25c019302a98dc'
     battery = Battery.query.filter_by(token=token).first()
     if battery:
         battery.last_soc = 65
