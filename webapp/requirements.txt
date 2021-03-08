@@ -1,5 +1,7 @@
 flask
 flask-sqlalchemy
 flask-bcrypt
+flask-restful
 flask-wtf
 python-secrets
+wtforms
