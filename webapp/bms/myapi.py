@@ -3,7 +3,6 @@ from bms.models import Battery
 from bms import db
 import csv
 import os
-import time
 
 
 class MyApi(Resource):
