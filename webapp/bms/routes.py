@@ -151,15 +151,11 @@ def delete():
     return redirect(url_for('home'))
 
 
-@application.route('/demo')
-def demo():
-    token = 'a0421187c3061d4897abafa01eab0630b61fd6c02d72ce25c019302a98dc'
-    battery = Battery.query.filter_by(token=token).first()
-    if battery:
-        battery.last_soc = 65
-        battery.last_temp = 31.5
-        battery.last_health = 96.7
-        battery.last_voltage = 3.41
-        db.session.commit()
-        return redirect('/')
-    return redirect('/')
+@application.route('/forgot_password')
+def forgot_password():
+    username = request.cookies.get('email')
+    if username:
+        resp = make_response(redirect('/forgot_password'))
+        resp.delete_cookie('email')
+        return resp
+    return render_template('forgot_password.html')
