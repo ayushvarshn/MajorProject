@@ -1,9 +1,12 @@
-from flask import render_template, url_for, flash, redirect, request, make_response
+from flask import render_template, url_for, flash, redirect, request, make_response, Response
 from bms import application, bcrypt, db
 from bms.models import User, Battery
 from secrets import token_hex
 from bms.forms import RegistrationForm, LoginForm, UpdateAccountForm, AddBattery, ChangePassword
 import os
+from bms.charts import MyChart
+import json
+import time
 
 
 @application.errorhandler(404)
@@ -48,8 +51,10 @@ def register():
         return redirect('/')
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_pw = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(name=form.name.data, username=form.username.data, email=form.email.data, password=hashed_pw)
+        hashed_pw = bcrypt.generate_password_hash(
+            form.password.data).decode('utf-8')
+        user = User(name=form.name.data, username=form.username.data,
+                    email=form.email.data, password=hashed_pw)
         db.session.add(user)
         db.session.commit()
         flash("Account created successfully", "success")
@@ -64,7 +69,8 @@ def add():
         form = AddBattery()
         if form.validate_on_submit():
             user = User.query.filter_by(email=username).first()
-            battery = Battery(name=form.name.data, token=token_hex(30), user_id=user.id)
+            battery = Battery(name=form.name.data,
+                              token=token_hex(30), user_id=user.id)
             db.session.add(battery)
             db.session.commit()
             flash('Battery Added!', 'success')
@@ -98,7 +104,6 @@ def account():
             resp = make_response(redirect('/account'))
             resp.set_cookie('email', form.email.data)
             return resp
-            # return redirect(url_for('account'))
         elif request.method == 'GET':
             form.email.data = user.email
             form.name.data = user.name
@@ -115,7 +120,8 @@ def changepassword():
         form = ChangePassword()
         if form.validate_on_submit():
             if bcrypt.check_password_hash(user.password, form.password.data):
-                user.password = bcrypt.generate_password_hash(form.new_password.data).decode('utf-8')
+                user.password = bcrypt.generate_password_hash(
+                    form.new_password.data).decode('utf-8')
                 db.session.commit()
                 flash('Password changed successfully', 'info')
                 return redirect(url_for('account'))
@@ -135,7 +141,7 @@ def logout():
     return resp
 
 
-@application.route('/delete', methods=['GET','POST'])
+@application.route('/delete', methods=['GET', 'POST'])
 def delete():
     username = request.cookies.get('email')
     if username:
@@ -159,3 +165,20 @@ def forgot_password():
         resp.delete_cookie('email')
         return resp
     return render_template('forgot_password.html')
+
+
+@application.route('/home/panel', methods=['GET', 'POST'])
+def panel():
+    username = request.cookies.get('email')
+    if username:
+        if request.method == 'POST':
+            token = request.form.get('token')
+            if Battery.query.filter_by(token=token).first():
+                chartdata = MyChart(token)
+                time = chartdata.sample('time', 30, 1000)
+                voltage = chartdata.sample('voltage', 30, 1000)
+                temp = chartdata.sample('temp', 30, 1000)
+                charge = chartdata.sample('soc', 30, 1000)
+                return render_template('panel.html', title='Dashboard', username=username, time=time, temp=temp, voltage=voltage, charge=charge, token=token)
+        return render_template('panel.html', title='Dashboard', username=username)
+    return redirect(url_for('login', next=request.endpoint))

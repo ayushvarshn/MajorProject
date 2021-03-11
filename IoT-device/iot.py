@@ -11,6 +11,7 @@ class InternetOfThings:
         self.token = token
 
     def auth(self):
+        print('authenticating...')
         response = requests.get(self.end + self.token + '/meta')
         if response:
             response_json = response.json()
@@ -29,16 +30,19 @@ class InternetOfThings:
         return 'failed'
 
     def write(self, row_data):
-        a = self.auth()
-        if a == 'success':
-            response = requests.put(self.end + self.token + '/write', data=row_data)
-            if response:
-                response_json = response.json()
-                if response_json['message'] == 'ok':
-                    return 'success'
-                return 'failed'
+        print('data = ' + str(row_data))
+        response = requests.put(self.end + self.token + '/write', data=row_data)
+        print(response.json())
+        if response:
+            response_json = response.json()
+            print(response_json['message'])
+            if response_json['message'] == 'ok':
+                return 'success'
+            elif response_json['message'] == 'invalid-token':
+                print("Authentication error")
+                return 'auth-error'
             return 'failed'
-        return 'auth-error'
+        return 'failed'
 
     def meta(self):
         if self.end:
@@ -128,14 +132,13 @@ class InternetOfThings:
                         w = self.write(row_json)
                         while w != 'success':
                             if w == 'failed':
+                                print('failed')
                                 time.sleep(2)
                                 w = self.write(row_json)
                             else:
                                 break
                         if w == 'auth-error':
                             break
-
-                        time.sleep(1)
 
             elif last_time == 'failed':
                 print("Incorrect information")
@@ -161,6 +164,5 @@ class InternetOfThings:
                                     break
                             if w == 'auth-error':
                                 break
-                            time.sleep(1)
         else:
             os.remove(self.token + '.json')
