@@ -173,12 +173,40 @@ def panel():
     if username:
         if request.method == 'POST':
             token = request.form.get('token')
-            if Battery.query.filter_by(token=token).first():
+            battery = Battery.query.filter_by(token=token).first()
+            if battery:
                 chartdata = MyChart(token)
                 time = chartdata.sample('time', 30, 1000)
                 voltage = chartdata.sample('voltage', 30, 1000)
                 temp = chartdata.sample('temp', 30, 1000)
                 charge = chartdata.sample('soc', 30, 1000)
-                return render_template('panel.html', title='Dashboard', username=username, time=time, temp=temp, voltage=voltage, charge=charge, token=token)
+                return render_template('panel.html',
+                                       title='Dashboard',
+                                       username=username,
+                                       time=time,
+                                       temp=temp,
+                                       voltage=voltage,
+                                       charge=charge,
+                                       battery=battery,
+                                       token=token
+                                       )
         return render_template('panel.html', title='Dashboard', username=username)
     return redirect(url_for('login', next=request.endpoint))
+
+
+@application.route('/chart')
+def chart():
+    def battery_data(battery):
+        while True:
+            json_data = json.dumps({
+                'charge': str(battery.last_soc) + '%',
+                'health': str(battery.last_health) + '%',
+                'voltage': str(battery.last_voltage) + 'V',
+                'temp': str(battery.last_temp) + '°C'
+            })
+            yield f"data:{json_data}\n\n"
+            time.sleep(1)
+    token = request.args['token']
+    battery = Battery.query.filter_by(token=token).first()
+    if battery:
+        return Response(battery_data(battery), mimetype='text/event-stream')

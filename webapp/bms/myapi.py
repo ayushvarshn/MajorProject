@@ -48,8 +48,8 @@ class MyApi(Resource):
                                       soc_prediction
                                       ])
                 battery.last_soc = soc_prediction
-                battery.last_temp = request.form['temp']
-                battery.last_voltage = request.form['voltage']
+                battery.last_temp = '%.2f' % float(request.form['temp'])
+                battery.last_voltage = '%.2f' % float(request.form['voltage'])
                 battery.last_time = request.form['index']
                 db.session.commit()
                 return {'message': 'ok'}

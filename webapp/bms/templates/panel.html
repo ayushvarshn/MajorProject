@@ -13,7 +13,7 @@
         <div class="card bg-dark">
           <div class="container-fluid ml-2 mt-2 mb-2">
             <h4 class="overview text-info">Health</h4>
-            <h1 class="mt-4 text-white" id="health-ov">96 %</h1>
+            <h1 class="mt-4 text-white" id="health-ov">{{battery.last_health}} %</h1>
           </div>
         </div>
       </div>
@@ -21,7 +21,7 @@
         <div class="card bg-dark">
           <div class="container-fluid ml-2 mt-2 mb-2">
             <h4 class="overview text-info">Temperature</h4>
-            <h1 class="mt-4 text-white" id="temp-ov">30.4 °C</h1>
+            <h1 class="mt-4 text-white" id="temp-ov">{{battery.last_temp}} °C</h1>
           </div>
         </div>
       </div>
@@ -29,7 +29,7 @@
         <div class="card bg-dark">
           <div class="container-fluid ml-2 mt-2 mb-2">
             <h4 class="overview text-info">Voltage</h4>
-            <h1 class="mt-4 text-white" id="voltage-ov">3.42 V</h1>
+            <h1 class="mt-4 text-white" id="voltage-ov">{{battery.last_voltage}} V</h1>
           </div>
         </div>
       </div>
@@ -37,7 +37,7 @@
         <div class="card bg-dark">
           <div class="container-fluid ml-2 mt-2 mb-2">
             <h4 class="overview text-info">Charge</h4>
-            <h1 class="mt-4 text-white" id="charge-ov">32 %</h1>
+            <h1 class="mt-4 text-white" id="charge-ov">{{battery.last_soc}} %</h1>
           </div>
         </div>
       </div>
