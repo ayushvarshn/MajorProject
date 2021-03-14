@@ -8,7 +8,11 @@ Before installing make sure you have succesfully installed Python3.6 or higher a
 3. Navigate to the diectory `MajorProject/webapp/bms`
 4. Open `__init__.py` and edit the database uri to your requirements, by default SQLITE will be used
 5. Change the secret key if you wish to keep it static (optional)
-6. Change the layout of user interface by changing the HTML files in `MajorProject/webapp/bms/templated` (optional)
+6. Change the layout of user interface by changing the HTML files in `MajorProject/webapp/bms/templates` (optional)
 7. navigate to `MajorProject/webapp` and start the server using `python3 run.py`
-## Installation of IoT software
-Please do not clone and deploy the project unless you know what you are doing as the development of this project is still under progress.
+## Installation of IoT software (temporary)
+Any IoT device with a Battery Management System can be installed with this software. Follow the guidelines below to emulate the working of the IoT device
+1. Navigate to `MajorProject/IoT-device`
+2. Edit the file `devices.py` and add the token number and endpoint
+3. Add additional instances of IoT-device
+4. Start the IoT deviice (simulation) using `python3 devices.py`
