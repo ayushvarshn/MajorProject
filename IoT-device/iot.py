@@ -30,10 +30,12 @@ class InternetOfThings:
         return 'failed'
 
     def write(self, row_data):
-        print('data = ' + str(row_data))
         response = requests.put(self.end + self.token + '/write', data=row_data)
         if response:
             response_json = response.json()
+            comment = response_json['comment']
+            if comment:
+                print('Comment: ' + comment)
             if response_json['message'] == 'ok':
                 return 'success'
             elif response_json['message'] == 'invalid-token':
@@ -115,6 +117,7 @@ class InternetOfThings:
     def start(self):
         authentication = self.meta()
         if authentication == 'success':
+            print("Working...")
             last_time = self.last()
             if last_time == 'success':
                 with open('csv_iot/data.csv', 'r') as csv_data:

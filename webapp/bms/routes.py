@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect, request, make_respo
 from bms import application, bcrypt, db
 from bms.models import User, Battery
 from secrets import token_hex
-from bms.forms import RegistrationForm, LoginForm, UpdateAccountForm, AddBattery, ChangePassword
+from bms.forms import RegistrationForm, LoginForm, UpdateAccountForm, AddBattery, ChangePassword, MessageBattery
 import os
 from bms.charts import MyChart
 import json
@@ -213,6 +213,36 @@ def panel(token):
                                        )
         return render_template('panel.html', title='Dashboard', username=username)
     return redirect(url_for('login', next=request.endpoint))
+
+
+@application.route('/guide')
+def guide():
+    username = request.cookies.get('email')
+    if username:
+        return render_template('guide.html', username=username, title='Guide')
+    return render_template('guide.html')
+
+
+@application.route('/message/<token>', methods=['GET', 'POST'])
+def message(token):
+    username = request.cookies.get('email')
+    if username:
+        battery = Battery.query.filter_by(token=token).first()
+        form = MessageBattery()
+        if form.validate_on_submit():
+            if battery:
+                print(battery.name)
+                battery.last_message = form.message.data
+                battery.note = form.message.data
+                db.session.commit()
+                flash('Message sent successfully', 'success')
+                return redirect(url_for('home'))
+            flash('Invalid Token', 'danger')
+            return redirect(url_for('home'))
+        elif request.method == 'GET':
+            form.message.data = battery.note
+        return render_template('message.html', username=username, title='Message Battery', form=form, battery=battery)
+    return redirect(url_for('login'))
 
 
 @application.route('/chart-data/<token>')
