@@ -251,7 +251,7 @@ def chart_data(token):
         while True:
             battery = Battery.query.filter_by(token=token).first()
             chartdata = MyChart(token)
-            time = chartdata.sample('time', 30, 1000)
+            times = chartdata.sample('time', 30, 1000)
             voltage = chartdata.sample('voltage', 30, 1000)
             vol = battery.last_voltage
             temp = chartdata.sample('temp', 30, 1000)
@@ -261,7 +261,7 @@ def chart_data(token):
             health = chartdata.sample_all('soh', 30)
             soh = battery.last_health
             json_data = json.dumps(
-                {'time': time,
+                {'time': times,
                  'voltage': voltage,
                  'temp': temp,
                  'charge': charge,
