@@ -55,5 +55,5 @@ class ChangePassword(FlaskForm):
 
 
 class MessageBattery(FlaskForm):
-    message = StringField('', validators=[Length(min=2)])
+    message = StringField('Note', validators=[Length(min=2)])
     submit = SubmitField('Update')

@@ -19,6 +19,7 @@ class InternetOfThings:
         if response:
             response_json = response.json()
             if response_json['message'] == self.token:
+                print('authenticated successfully')
                 return 'success'
             return 'failed'
         return 'failed'
@@ -48,7 +49,7 @@ class InternetOfThings:
     def start(self):
         authentication = self.auth()
         if authentication == 'success':
-            print("Working...")
+            print("Uploading data")
             last_time = self.last()
             if last_time == 'success':
                 with open('csv_iot/data.csv', 'r') as csv_data:

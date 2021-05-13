@@ -202,14 +202,18 @@ def delete(token):
     username = request.cookies.get('email')
     if username:
         user = User.query.filter_by(email=username).first()
+        battery = Battery.query.filter_by(token=token).first()
         if user:
-            if request.method == 'GET':
-                Battery.query.filter_by(token=token).delete()
-                db.session.commit()
-                if os.path.exists('csv/'+token+'.csv'):
-                    os.remove('csv/'+token+'.csv')
-                flash('The battery has been deleted!', 'info')
-                return redirect('/home')
+            if battery:
+                if request.method == 'GET':
+                    Battery.query.filter_by(token=token).delete()
+                    db.session.commit()
+                    if os.path.exists('csv/'+token+'.csv'):
+                        os.remove('csv/'+token+'.csv')
+                    flash('The battery has been deleted!', 'info')
+                    return redirect('/home')
+                return redirect(url_for('home'))
+            flash('Battery with given token not found!', 'warning')
             return redirect(url_for('home'))
         return redirect(url_for('logout'))
     return redirect(url_for('home'))
@@ -269,22 +273,24 @@ def message(token):
     username = request.cookies.get('email')
     if username:
         user = User.query.filter_by(email=username).first()
+        battery = Battery.query.filter_by(token=token).first()
         if user:
-            battery = Battery.query.filter_by(token=token).first()
-            form = MessageBattery()
-            if form.validate_on_submit():
-                if battery:
-                    battery.last_message = form.message.data
-                    battery.note = form.message.data
-                    db.session.commit()
-                    flash('Message sent successfully', 'success')
+            if battery:
+                form = MessageBattery()
+                if form.validate_on_submit():
+                    if battery:
+                        battery.last_message = form.message.data
+                        battery.note = form.message.data
+                        db.session.commit()
+                        flash('Note updated successfully', 'success')
+                        return redirect(url_for('home'))
+                    flash('Invalid Token', 'danger')
                     return redirect(url_for('home'))
-                flash('Invalid Token', 'danger')
-                return redirect(url_for('home'))
-            elif request.method == 'GET':
-                form.message.data = battery.note
-            return render_template('message.html',
-                                   username=username, title='Message Battery', form=form, battery=battery)
+                elif request.method == 'GET':
+                    form.message.data = battery.note
+                return render_template('message.html',
+                                       username=username, title='Message Battery', form=form, battery=battery)
+            return redirect(url_for('home'))
         return redirect(url_for('logout'))
     return redirect(url_for('login'))
 
